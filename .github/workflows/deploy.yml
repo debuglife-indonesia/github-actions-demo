@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Butuh pages:write + id-token untuk deploy GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # Deploy hanya jalan kalau test lulus (needs: test)
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Buat halaman statis dari versi package.json
+        run: |
+          mkdir -p site
+          VERSION=$(node -p "require('./package.json').version")
+          cat > site/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="id">
+          <head><meta charset="utf-8"><title>GitHub Actions Demo</title></head>
+          <body>
+            <h1>GitHub Actions Demo</h1>
+            <p>Versi aplikasi: <code>${VERSION}</code></p>
+            <p>Deploy otomatis dari workflow <code>deploy.yml</code>.</p>
+          </body>
+          </html>
+          EOF
+          # Rapikan indentasi leading spaces dari heredoc
+          sed -i 's/^[[:space:]]*//' site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
