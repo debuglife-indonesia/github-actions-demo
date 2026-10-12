@@ -1,0 +1,20 @@
+# Contoh bonus (tidak didemokan live) — memanggil reusable-test.yml
+name: CI Reusable
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-reusable-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  call-test:
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      node-version: "20"

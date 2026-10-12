@@ -1,0 +1,26 @@
+# Contoh bonus (tidak didemokan live) — reusable workflow (on: workflow_call)
+name: Reusable Test
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Versi Node.js
+        type: string
+        default: "20"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test

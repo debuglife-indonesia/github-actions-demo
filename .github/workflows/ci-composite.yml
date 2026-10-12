@@ -1,0 +1,28 @@
+# Contoh bonus (tidak didemokan live) — pakai composite action lokal
+name: CI Composite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-composite-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Composite: gabungan setup-node + cache + npm ci
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          node-version: "20"
+
+      - run: npm run lint
+      - run: npm test

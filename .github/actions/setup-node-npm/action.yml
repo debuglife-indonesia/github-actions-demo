@@ -1,0 +1,20 @@
+name: Setup Node + npm ci
+description: Composite action — setup Node, cache npm, lalu npm ci
+
+inputs:
+  node-version:
+    description: Versi Node.js
+    required: false
+    default: "20"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
