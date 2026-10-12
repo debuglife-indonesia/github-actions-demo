@@ -17,13 +17,30 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Matrix: jalankan tes yang sama di beberapa versi Node
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
     steps:
       - uses: actions/checkout@v4
 
+      # cache: npm — unduhan paket disimpan antar run
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node-version }}
+          cache: npm
 
       - run: npm ci
       - run: npm run lint
       - run: npm test
+
+      # Secret DEMO_TOKEN: jangan pernah echo nilainya, cek panjang saja
+      - name: Cek secret DEMO_TOKEN
+        env:
+          DEMO_TOKEN: ${{ secrets.DEMO_TOKEN }}
+        run: |
+          if [ -z "$DEMO_TOKEN" ]; then
+            echo "DEMO_TOKEN belum disetel (step tetap lulus)"
+          else
+            echo "DEMO_TOKEN terdeteksi, panjang=${#DEMO_TOKEN}"
+          fi
