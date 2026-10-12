@@ -3,7 +3,8 @@ import { add, multiply, subtract } from "../src/calc.js";
 
 describe("calc", () => {
   it("menjumlahkan dua angka positif", () => {
-    expect(add(2, 2)).toBe(4);
+    // Sengaja salah: expect 5 supaya run CI merah (demo gagal)
+    expect(add(2, 2)).toBe(5);
   });
 
   it("menjumlahkan angka negatif", () => {
